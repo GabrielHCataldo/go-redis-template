@@ -7,8 +7,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/GabrielHCataldo/go-redis-template)](https://goreportcard.com/report/github.com/GabrielHCataldo/go-redis-template)
 [![Coverage Status](https://coveralls.io/repos/GabrielHCataldo/go-redis-template/badge.svg?branch=main&service=github)](https://coveralls.io/github/GabrielHCataldo/go-mongo?branch=main)
 [![Open Source Helpers](https://www.codetriage.com/gabrielhcataldo/go-redis-template/badges/users.svg)](https://www.codetriage.com/gabrielhcataldo/go-mongo)
-[![RedisDoc](https://badgen.net/badge/Redis/doc/red?icon=Redis)](https://redis.io/commands/)
-[![RedisDriver](https://badgen.net/badge/Redis/driver/red)](https://github.com/redis/go-redis)
+[![RedisDoc](https://badgen.net/badge/redis/doc/red?icon=Redis)](https://redis.io/commands/)
+[![RedisDriver](https://badgen.net/badge/redis/driver/red)](https://github.com/redis/go-redis)
 [![GoDoc](https://godoc.org/github/GabrielHCataldo/go-mongo?status.svg)](https://pkg.go.dev/github.com/GabrielHCataldo/go-redis-template/redis)
 ![License](https://img.shields.io/dub/l/vibe-d.svg)
 
