@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Set represents options that can be used to configure an 'Set' operation.
 type Set struct {
 	// Mode can be SetModeNx, SetModeXx or SetModeDefault.
 	Mode SetMode
@@ -16,30 +17,36 @@ type Set struct {
 	KeepTTL bool
 }
 
+// NewSet creates a new Set instance.
 func NewSet() Set {
 	return Set{}
 }
 
+// SetMode sets value for the Mode field.
 func (s Set) SetMode(mode SetMode) Set {
 	s.Mode = mode
 	return s
 }
 
+// SetTTL sets value for the TTL field.
 func (s Set) SetTTL(ttl time.Duration) Set {
 	s.TTL = ttl
 	return s
 }
 
+// SetExpireAt sets value for the ExpireAt field.
 func (s Set) SetExpireAt(expAt time.Time) Set {
 	s.ExpireAt = expAt
 	return s
 }
 
+// SetKeepTTL sets value for the KeepTTL field.
 func (s Set) SetKeepTTL(keepTTL bool) Set {
 	s.KeepTTL = keepTTL
 	return s
 }
 
+// GetOptionSetByParams assembles the Set object from optional parameters.
 func GetOptionSetByParams(opts []Set) Set {
 	result := Set{}
 	for _, opt := range opts {
