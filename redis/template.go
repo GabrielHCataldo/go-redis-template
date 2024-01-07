@@ -11,9 +11,12 @@ import (
 )
 
 type MSetInput struct {
-	Key   any
+	// Key can be of any type, but cannot be null, and must be compatible with conversion to string (helper.ConvertToString).
+	Key any
+	// Value can be of any type, but cannot be null, and must be compatible with conversion to string (helper.ConvertToString).
 	Value any
-	Opt   option.Set
+	// Opt to customize the operation (not required)
+	Opt option.Set
 }
 
 type MSetOutput struct {
@@ -31,25 +34,76 @@ type template struct {
 }
 
 type Template interface {
-	// Set redis value, custom options command set using option.Set
+	// Set supports all options that the SET command supports.
+	//
+	// The key and value parameters can be of any type, but cannot be nil, if an error occurs when converting the key
+	// or value, the error returned is ErrConvertKey or ErrConvertValue respectively.
+	//
+	// If the return is nil, the operation was carried out successfully, otherwise an error occurred in the operation.
+	//
+	// To customize the operation, use the opts parameter (option.Set).
 	Set(ctx context.Context, key, value any, opts ...option.Set) error
-	// MSet multiple set redis value, custom options command set MSetInput.Opt using option.Set
+	// MSet defines N values. (Multiple Set)
+	//
+	// Parameter values cannot be empty, and must follow the Set function documentation for each MSetInput.
+	//
+	// The return will have a list of MSetOutput with each key and the error // that occurred, if the MSetOutput.Err
+	// field is nil, it means that the operation for that key (MSetOutput.Key) was carried out successfully, otherwise
+	// it failed .
 	MSet(ctx context.Context, values ...MSetInput) []MSetOutput
-	// SetGet set redis value and fill dest with old value
+	// SetGet supports all options that the SET command supports.
+	//
+	// The key and value parameters can be of any type, but cannot be null, in case an error occurs when converting the key
+	// or value, the error returned is ErrConvertKey or ErrConvertValue respectively.
+	//
+	// The dest parameter must be a pointer, not null, if we do not find a predecessor value to the set, dest will not
+	// have any modification
+	//
+	// If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
+	//
+	// To customize the operation, use the opts parameter (option.Set).
 	SetGet(ctx context.Context, key, value, dest any, opts ...option.Set) error
-	// Rename redis key
+	// Rename redis key.
+	//
+	// The key and newKey parameters can be of any type, but cannot be null, in case an error occurs when converting
+	// the key or newKey, the error returned is ErrConvertKey or ErrConvertNewKey respectively.
+	//
+	// If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 	Rename(ctx context.Context, key, newKey any) error
-	// Get redis value by key, dest need a pointer
+	// Get redis `GET key` command.
+	//
+	// The key parameter can be of any type, but cannot be null, in case an error occurs when converting, the error
+	// returned is ErrConvertKey.
+	//
+	// The dest parameter must be a pointer, not null, if we do not find any value, dest will not have any modification.
+	//
+	// If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 	Get(ctx context.Context, key, dest any) error
-	// GetDel delete redis keys and fill dest with values
-	GetDel(ctx context.Context, dest any, keys any) error
-	// Count redis values by key
-	Count(ctx context.Context, key any) (int64, error)
-	// Exists redis values by key
+	// GetDel get and delete value by key.
+	//
+	// The key parameter can be of any type, but cannot be null, if an error occurs during the conversion, the error
+	// returned is ErrConvertKey. If no registered key is found, the error ErrKeyNotFound is returned.
+	//
+	// The dest parameter must be a pointer, not null, if we do not find any value, dest will not have any modification.
+	//
+	// If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
+	GetDel(ctx context.Context, key, dest any) error
+	// Exists redis values by key.
+	//
+	// The key parameter can be of any type, but cannot be null, if an error occurs during the conversion, the error
+	// returned is ErrConvertKey.
+	//
+	// The return if true means that the key exists, otherwise it returns false, and if an error occurs in the operation
+	// we return false with the second return parameter filled in
 	Exists(ctx context.Context, key any) (bool, error)
-	// Keys return list of keys by pattern
+	// Keys return list of keys by pattern.
 	Keys(ctx context.Context, pattern string) ([]string, error)
-	// Del delete redis keys
+	// Del delete redis keys.
+	//
+	// The keys parameter can be of any type, but cannot be empty, if an error occurs during the conversion, the error
+	// returned is ErrConvertKey.
+	//
+	// If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 	Del(ctx context.Context, keys ...any) error
 	// Scan return list keys pageable by match
 	Scan(ctx context.Context, cursor uint64, match string, count int64) ScanOutput
@@ -59,6 +113,7 @@ type Template interface {
 	SimpleDisconnect()
 }
 
+// NewTemplate create a new template instance
 func NewTemplate(opts option.Client) Template {
 	client := redis.NewClient(opts.ParseToRedisOptions())
 	return template{
@@ -123,7 +178,7 @@ func (t template) Get(ctx context.Context, key, dest any) error {
 	return helper.ConvertToDest(result, dest)
 }
 
-func (t template) GetDel(ctx context.Context, dest any, key any) error {
+func (t template) GetDel(ctx context.Context, key, dest any) error {
 	sKey, err := helper.ConvertToString(key)
 	if err != nil {
 		return ErrConvertKey
@@ -138,26 +193,17 @@ func (t template) GetDel(ctx context.Context, dest any, key any) error {
 	return helper.ConvertToDest(result.Val(), dest)
 }
 
-func (t template) Count(ctx context.Context, key any) (int64, error) {
+func (t template) Exists(ctx context.Context, key any) (bool, error) {
 	sKey, err := helper.ConvertToString(key)
 	if err != nil {
-		return 0, ErrConvertKey
+		return false, ErrConvertKey
 	}
 	result := t.client.Exists(ctx, sKey)
-	if result.Err() != nil && !errors.Is(result.Err(), redis.Nil) {
-		return 0, result.Err()
-	}
-	return result.Val(), nil
-}
-
-func (t template) Exists(ctx context.Context, key any) (bool, error) {
-	count, err := t.Count(ctx, key)
-	return count > 0, err
+	return result.Val() > 0, result.Err()
 }
 
 func (t template) Keys(ctx context.Context, pattern string) ([]string, error) {
-	result := t.client.Keys(ctx, pattern)
-	return result.Val(), result.Err()
+	return t.client.Keys(ctx, pattern).Result()
 }
 
 func (t template) Scan(ctx context.Context, cursor uint64, match string, count int64) ScanOutput {
