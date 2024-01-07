@@ -98,6 +98,8 @@ type Template interface {
 	Exists(ctx context.Context, key any) (bool, error)
 	// Keys return list of keys by pattern.
 	Keys(ctx context.Context, pattern string) ([]string, error)
+	// Scan return list keys pageable by match
+	Scan(ctx context.Context, cursor uint64, match string, count int64) ScanOutput
 	// Del delete redis keys.
 	//
 	// The keys parameter can be of any type, but cannot be empty, if an error occurs during the conversion, the error
@@ -105,8 +107,6 @@ type Template interface {
 	//
 	// If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 	Del(ctx context.Context, keys ...any) error
-	// Scan return list keys pageable by match
-	Scan(ctx context.Context, cursor uint64, match string, count int64) ScanOutput
 	// Disconnect close connection to redis
 	Disconnect() error
 	// SimpleDisconnect close connection to redis without error

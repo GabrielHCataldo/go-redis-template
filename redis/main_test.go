@@ -8,7 +8,6 @@ import (
 )
 
 const redisKeyDefault = "test-key"
-const redisListKeyDefault = "test-list-key"
 const redisDurationDefault = 5 * time.Minute
 
 var redisTemplate Template
@@ -50,10 +49,22 @@ type testRename struct {
 }
 
 type testGet struct {
+	name          string
+	key           any
+	dest          any
+	wantErr       bool
+	wantTimoutErr bool
+}
+
+type testDel struct {
 	name    string
-	key     any
-	dest    any
+	keys    []any
 	wantErr bool
+}
+
+type testKeys struct {
+	name   string
+	patten string
 }
 
 func initTemplate() {
@@ -89,10 +100,14 @@ func initListTestSet() []testSet {
 			opt:   initOptionSet(),
 		},
 		{
-			name:    "failed opts",
-			key:     redisKeyDefault,
-			value:   initTestStruct(),
-			opt:     initOptionSet().SetKeepTTL(true),
+			name:  "failed opts",
+			key:   redisKeyDefault,
+			value: initTestStruct(),
+			opt: initOptionSet().
+				SetMode(option.SetModeNx).
+				SetMode(option.SetModeXx).
+				SetKeepTTL(true).
+				SetExpireAt(time.Now()),
 			wantErr: true,
 		},
 		{
@@ -210,6 +225,94 @@ func initListTestGet() []testGet {
 	}
 }
 
+func initListTestGetDel() []testGet {
+	return []testGet{
+		{
+			name: "success",
+			key:  redisKeyDefault,
+			dest: &testStruct{},
+		},
+		{
+			name:          "failed timout",
+			key:           redisKeyDefault,
+			dest:          &testStruct{},
+			wantTimoutErr: true,
+			wantErr:       true,
+		},
+		{
+			name:    "failed not exists",
+			key:     "",
+			dest:    &testStruct{},
+			wantErr: true,
+		},
+		{
+			name:    "failed key",
+			key:     nil,
+			dest:    &testStruct{},
+			wantErr: true,
+		},
+		{
+			name:    "failed key not pointer",
+			key:     "test",
+			dest:    testStruct{},
+			wantErr: true,
+		},
+	}
+}
+
+func initListTestDel() []testDel {
+	return []testDel{
+		{
+			name: "success",
+			keys: []any{redisKeyDefault},
+		},
+		{
+			name:    "failed keys",
+			keys:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "failed keys empty",
+			keys:    []any{},
+			wantErr: true,
+		},
+		{
+			name:    "failed key",
+			keys:    []any{nil},
+			wantErr: true,
+		},
+	}
+}
+
+func initListTestExists() []testGet {
+	return []testGet{
+		{
+			name: "success",
+			key:  redisKeyDefault,
+			dest: &testStruct{},
+		},
+		{
+			name:    "failed key",
+			key:     nil,
+			dest:    &testStruct{},
+			wantErr: true,
+		},
+	}
+}
+
+func initListTestKeys() []testKeys {
+	return []testKeys{
+		{
+			name:   "success",
+			patten: redisKeyDefault,
+		},
+		{
+			name:   "success empty",
+			patten: "",
+		},
+	}
+}
+
 func initMSetInputs() []MSetInput {
 	return []MSetInput{
 		{
@@ -241,6 +344,5 @@ func initOptionSet() option.Set {
 	return option.NewSet().
 		SetMode(option.SetModeDefault).
 		SetTTL(redisDurationDefault).
-		SetExpireAt(time.Time{}).
 		SetKeepTTL(false)
 }
