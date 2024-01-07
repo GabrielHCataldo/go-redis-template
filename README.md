@@ -84,6 +84,7 @@ func main() {
         Password: os.Getenv("REDIS_PASSWORD"),
         DB:       0,
     })
+    defer redisTemplate.SimpleDisconnect()
     ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
     defer cancel()
     opt := option.NewSet()
@@ -135,6 +136,7 @@ func main() {
         Password: os.Getenv("REDIS_PASSWORD"),
         DB:       0,
     })
+    defer redisTemplate.SimpleDisconnect()
     ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
     defer cancel()
     err := redisTemplate.Get(ctx, key, &dest,)
@@ -180,6 +182,7 @@ func main() {
         Password: os.Getenv("REDIS_PASSWORD"),
         DB:       0,
     })
+    defer redisTemplate.SimpleDisconnect()
     ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
     defer cancel()
     alreadyExists, err := redisTemplate.Exists(ctx, key)
@@ -218,6 +221,7 @@ func main() {
         Password: os.Getenv("REDIS_PASSWORD"),
         DB:       0,
     })
+    defer redisTemplate.SimpleDisconnect()
     ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
     defer cancel()
     err := redisTemplate.Del(ctx, key1, key2)
