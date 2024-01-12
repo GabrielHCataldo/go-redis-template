@@ -5,8 +5,8 @@ import (
 	"github.com/GabrielHCataldo/go-error-detail/errors"
 	"github.com/GabrielHCataldo/go-helper/helper"
 	"github.com/GabrielHCataldo/go-logger/logger"
+	"github.com/GabrielHCataldo/go-redis-template/redis/option"
 	"github.com/redis/go-redis/v9"
-	"go-redis-template/redis/option"
 	"strconv"
 )
 

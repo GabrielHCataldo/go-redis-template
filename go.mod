@@ -1,4 +1,4 @@
-module go-redis-template
+module github.com/GabrielHCataldo/go-redis-template
 
 go 1.21.3
 

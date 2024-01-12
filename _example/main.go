@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/GabrielHCataldo/go-helper/helper"
 	"github.com/GabrielHCataldo/go-logger/logger"
-	"go-redis-template/redis"
-	"go-redis-template/redis/option"
+	"github.com/GabrielHCataldo/go-redis-template/redis"
+	"github.com/GabrielHCataldo/go-redis-template/redis/option"
 	"os"
 	"time"
 )

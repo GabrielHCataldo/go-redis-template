@@ -2,7 +2,7 @@ package redis
 
 import (
 	"context"
-	"go-redis-template/redis/option"
+	"github.com/GabrielHCataldo/go-redis-template/redis/option"
 	"os"
 	"time"
 )
