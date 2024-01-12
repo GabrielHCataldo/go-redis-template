@@ -67,6 +67,11 @@ type testKeys struct {
 	patten string
 }
 
+type testSprintKey struct {
+	name   string
+	values []any
+}
+
 func initTemplate() {
 	redisTemplate = NewTemplate(option.Client{
 		Addr:     os.Getenv("REDIS_URL"),
@@ -309,6 +314,15 @@ func initListTestKeys() []testKeys {
 		{
 			name:   "success empty",
 			patten: "",
+		},
+	}
+}
+
+func initListTestSprintKey() []testSprintKey {
+	return []testSprintKey{
+		{
+			name:   "success",
+			values: []any{"test", redisKeyDefault, nil},
 		},
 	}
 }

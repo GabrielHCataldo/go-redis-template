@@ -2,12 +2,14 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"github.com/GabrielHCataldo/go-error-detail/errors"
 	"github.com/GabrielHCataldo/go-helper/helper"
 	"github.com/GabrielHCataldo/go-logger/logger"
 	"github.com/GabrielHCataldo/go-redis-template/redis/option"
 	"github.com/redis/go-redis/v9"
 	"strconv"
+	"strings"
 )
 
 type MSetInput struct {
@@ -107,6 +109,8 @@ type Template interface {
 	//
 	// If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 	Del(ctx context.Context, keys ...any) error
+	// SprintKey format values as prefix in string for a future redis key, ex: "test", "test2" -> "test:test2"
+	SprintKey(v ...any) string
 	// Disconnect close connection to redis
 	Disconnect() error
 	// SimpleDisconnect close connection to redis without error
@@ -225,6 +229,21 @@ func (t template) Del(ctx context.Context, keys ...any) error {
 		sKeys = append(sKeys, sKey)
 	}
 	return t.client.Del(ctx, sKeys...).Err()
+}
+
+func (t template) SprintKey(vs ...any) string {
+	var builder strings.Builder
+	for _, v := range vs {
+		s, err := helper.ConvertToString(v)
+		if helper.IsNil(err) {
+			if builder.Len() != 0 {
+				builder.WriteString(fmt.Sprint(":", s))
+			} else {
+				builder.WriteString(s)
+			}
+		}
+	}
+	return builder.String()
 }
 
 func (t template) Disconnect() error {

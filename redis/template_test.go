@@ -162,6 +162,16 @@ func TestTemplateDel(t *testing.T) {
 	}
 }
 
+func TestTemplateSprintKey(t *testing.T) {
+	initTemplate()
+	for _, tt := range initListTestSprintKey() {
+		t.Run(tt.name, func(t *testing.T) {
+			result := redisTemplate.SprintKey(tt.values...)
+			logger.Info("result spring key:", result)
+		})
+	}
+}
+
 func TestTemplateDisconnect(t *testing.T) {
 	initTemplate()
 	err := redisTemplate.Disconnect()
