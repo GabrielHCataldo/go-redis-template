@@ -2,6 +2,8 @@ github.com/GabrielHCataldo/go-error-detail v1.0.1 h1:hxuY8D50UgK8BGgVLydB5WQuEhy
 github.com/GabrielHCataldo/go-error-detail v1.0.1/go.mod h1:nv6MOqd3Pyua7AxaYMfsk4kTSleaB45yddBRy3JKPx4=
 github.com/GabrielHCataldo/go-helper v1.0.5 h1:YvJKcPU/L/Q4QWw7oc3MITefAWosRtK2bVyf2ZgpptE=
 github.com/GabrielHCataldo/go-helper v1.0.5/go.mod h1:PQzAUM8zkykqh91zBwTjjUYwMU/wjDJb4bkbCI3ddbk=
+github.com/GabrielHCataldo/go-helper v1.1.0 h1:MWfr0d/7liWBc06VyIav3vS1f+yzn8s2p1XasadYbl8=
+github.com/GabrielHCataldo/go-helper v1.1.0/go.mod h1:PQzAUM8zkykqh91zBwTjjUYwMU/wjDJb4bkbCI3ddbk=
 github.com/GabrielHCataldo/go-logger v1.0.9 h1:dhg/Zrxl8iygjEO/rQezsZk6v9RCsEnch30hYwUGK8U=
 github.com/GabrielHCataldo/go-logger v1.0.9/go.mod h1:xFMqeAgNIh2QK0wYTMbcxByzC2cXOU3mb+olBgXxgl8=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=

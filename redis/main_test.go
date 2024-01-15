@@ -10,7 +10,7 @@ import (
 const redisKeyDefault = "test-key"
 const redisDurationDefault = 5 * time.Minute
 
-var redisTemplate Template
+var redisTemplate *Template
 
 type testStruct struct {
 	Name      string
