@@ -3,7 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
-	"github.com/GabrielHCataldo/go-error-detail/errors"
+	"github.com/GabrielHCataldo/go-errors/errors"
 	"github.com/GabrielHCataldo/go-helper/helper"
 	"github.com/GabrielHCataldo/go-logger/logger"
 	"github.com/GabrielHCataldo/go-redis-template/redis/option"
