@@ -237,10 +237,10 @@ func (t Template) Disconnect() error {
 func (t Template) SimpleDisconnect() {
 	err := t.client.Close()
 	if helper.IsNotNil(err) {
-		logger.Error("error disconnect redis:", err)
+		logger.ErrorSkipCaller(2, "error disconnect:", err)
 		return
 	}
-	logger.Info("connection to redis closed.")
+	logger.InfoSkipCaller(2, "connection to redis closed.")
 }
 
 func (t Template) set(ctx context.Context, key, value any, get bool, opts ...*option.Set) (*redis.StatusCmd, error) {
