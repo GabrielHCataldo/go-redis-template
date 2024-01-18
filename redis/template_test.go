@@ -13,7 +13,7 @@ func TestTemplateSet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 			defer cancel()
-			err := redisTemplate.Set(ctx, tt.key, tt.value, tt.opt)
+			err := redisTemplate.Set(ctx, tt.key, tt.value, tt.opt, nil)
 			if (err != nil) != tt.wantErr {
 				logger.Errorf("Set() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
@@ -40,7 +40,7 @@ func TestTemplateSetGet(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 			defer cancel()
-			err := redisTemplate.SetGet(ctx, tt.key, tt.value, tt.dest, tt.opt)
+			err := redisTemplate.SetGet(ctx, tt.key, tt.value, tt.dest, tt.opt, nil)
 			if (err != nil) != tt.wantErr {
 				logger.Errorf("SetGet() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()

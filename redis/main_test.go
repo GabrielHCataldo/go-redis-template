@@ -23,7 +23,7 @@ type testSet struct {
 	name    string
 	key     any
 	value   any
-	opt     option.Set
+	opt     *option.Set
 	wantErr bool
 }
 
@@ -37,7 +37,7 @@ type testSetGet struct {
 	key     any
 	value   any
 	dest    any
-	opt     option.Set
+	opt     *option.Set
 	wantErr bool
 }
 
@@ -354,7 +354,7 @@ func initMSetInputs() []MSetInput {
 	}
 }
 
-func initOptionSet() option.Set {
+func initOptionSet() *option.Set {
 	return option.NewSet().
 		SetMode(option.SetModeDefault).
 		SetTTL(redisDurationDefault).

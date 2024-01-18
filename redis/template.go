@@ -18,7 +18,7 @@ type MSetInput struct {
 	// Value can be of any type, but cannot be null, and must be compatible with conversion to string (helper.ConvertToString).
 	Value any
 	// Opt to customize the operation (not required)
-	Opt option.Set
+	Opt *option.Set
 }
 
 type MSetOutput struct {
@@ -51,7 +51,7 @@ func NewTemplate(opts option.Client) *Template {
 // If the return is nil, the operation was carried out successfully, otherwise an error occurred in the operation.
 //
 // To customize the operation, use the opts parameter (option.Set).
-func (t Template) Set(ctx context.Context, key, value any, opts ...option.Set) error {
+func (t Template) Set(ctx context.Context, key, value any, opts ...*option.Set) error {
 	result, err := t.set(ctx, key, value, false, opts...)
 	if err == nil {
 		err = result.Err()
@@ -89,7 +89,7 @@ func (t Template) MSet(ctx context.Context, values ...MSetInput) []MSetOutput {
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 //
 // To customize the operation, use the opts parameter (option.Set).
-func (t Template) SetGet(ctx context.Context, key, value, dest any, opts ...option.Set) error {
+func (t Template) SetGet(ctx context.Context, key, value, dest any, opts ...*option.Set) error {
 	result, err := t.set(ctx, key, value, true, opts...)
 	if helper.IsNotNil(err) {
 		return err
@@ -243,7 +243,7 @@ func (t Template) SimpleDisconnect() {
 	logger.Info("connection to redis closed.")
 }
 
-func (t Template) set(ctx context.Context, key, value any, get bool, opts ...option.Set) (*redis.StatusCmd, error) {
+func (t Template) set(ctx context.Context, key, value any, get bool, opts ...*option.Set) (*redis.StatusCmd, error) {
 	opt := option.GetOptionSetByParams(opts)
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
