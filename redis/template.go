@@ -218,7 +218,7 @@ func (t Template) SprintKey(vs ...any) string {
 	for _, v := range vs {
 		s, err := helper.ConvertToString(v)
 		if helper.IsNil(err) {
-			if helper.IsNotEqual(builder.Len(), 0) {
+			if helper.IsNotEmpty(builder.Len()) {
 				builder.WriteString(fmt.Sprint(":", s))
 			} else {
 				builder.WriteString(s)

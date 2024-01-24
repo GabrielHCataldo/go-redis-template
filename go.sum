@@ -1,11 +1,9 @@
-github.com/GabrielHCataldo/go-errors v1.0.6 h1:EadRykfD/VBbSFZXQgW/N9ZYYLohuP1guo+p0h4tbwQ=
-github.com/GabrielHCataldo/go-errors v1.0.6/go.mod h1:D911Qvns9rDmfY+f7Y1JLgIunPbS8ubr+2edLtA8ewU=
-github.com/GabrielHCataldo/go-helper v1.2.7 h1:EbYWHHDe/5cPz1M0dF17os910AClJzp/V7xkRytW9y0=
-github.com/GabrielHCataldo/go-helper v1.2.7/go.mod h1:+whI36aUg1BfvLpZWJ8j81+d5iPuxl58ApOJqTIliCU=
-github.com/GabrielHCataldo/go-logger v1.1.3 h1:E1KIAGaHaNaaeEcHaWwKM6rtRhc/CIrzr0T2qmYB5D4=
-github.com/GabrielHCataldo/go-logger v1.1.3/go.mod h1:gbI+lrqSCG/OC6TP8rrC/VRdNEyf5JrvdbR6z+mIoyM=
-github.com/GabrielHCataldo/go-logger v1.1.5 h1:a6mb1yV7rdj71zCnKLagQ2YIQNcOadlsEjcUk6PHqLA=
-github.com/GabrielHCataldo/go-logger v1.1.5/go.mod h1:vWKwItwUTCPzywbosiUC56ehnAt3k/GFtlm+fmzWm2Y=
+github.com/GabrielHCataldo/go-errors v1.0.8 h1:28ryfzyU0fYDNgg+37zZauwnRRMyFSujWpntmuuCx00=
+github.com/GabrielHCataldo/go-errors v1.0.8/go.mod h1:ka5NCxa3Ry4TqvJXJMSCl5Vj3QWrdLMNAUXQNSjD9kg=
+github.com/GabrielHCataldo/go-helper v1.2.9 h1:GLIj6vwvBHEeGdwPoIaenpxB7C7D/IPmOxrLudhyviY=
+github.com/GabrielHCataldo/go-helper v1.2.9/go.mod h1:+whI36aUg1BfvLpZWJ8j81+d5iPuxl58ApOJqTIliCU=
+github.com/GabrielHCataldo/go-logger v1.1.6 h1:D1fFmDy+94QtPyuhOz1F6H7jFxnFd5/+rF1iLyt2J0E=
+github.com/GabrielHCataldo/go-logger v1.1.6/go.mod h1:Z+bJSxDzm0vLzV93qn+FOPbiQ3XX2JIaSABA0++Z9r0=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=
