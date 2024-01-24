@@ -272,7 +272,7 @@ func initListTestDel() []testDel {
 			keys: []any{redisKeyDefault},
 		},
 		{
-			name:    "failed keys",
+			name:    "failed keys nil",
 			keys:    nil,
 			wantErr: true,
 		},
@@ -282,7 +282,7 @@ func initListTestDel() []testDel {
 			wantErr: true,
 		},
 		{
-			name:    "failed key",
+			name:    "failed key nil",
 			keys:    []any{nil},
 			wantErr: true,
 		},

@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"github.com/GabrielHCataldo/go-logger/logger"
 	"testing"
 	"time"
@@ -17,7 +18,10 @@ func TestTemplateSet(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				logger.Errorf("Set() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
+				return
 			}
+			logger.Info("result:", err)
+			logger.Info("result err convert key equal:", errors.Is(err, ErrConvertKey))
 		})
 	}
 }
@@ -63,7 +67,6 @@ func TestTemplateRename(t *testing.T) {
 				t.Fail()
 			}
 			logger.Infof("Rename() err = %v", err)
-
 		})
 	}
 }
@@ -157,7 +160,10 @@ func TestTemplateDel(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				logger.Errorf("Del() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
+				return
 			}
+			logger.Info("result:", err)
+			logger.Info("result err convert key equal:", errors.Is(err, ErrConvertKeyIndex))
 		})
 	}
 }
