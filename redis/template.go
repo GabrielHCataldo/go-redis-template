@@ -51,7 +51,7 @@ func NewTemplate(opts option.Client) *Template {
 //
 // To customize the operation, use the opts parameter (option.Set).
 func (t Template) Set(ctx context.Context, key, value any, opts ...*option.Set) error {
-	result, err := t.set(ctx, key, value, false, opts...)
+	result, err := t.set(ctx, 2, key, value, false, opts...)
 	if err == nil {
 		err = errors.NewSkipCaller(2, result.Err())
 	}
@@ -68,10 +68,13 @@ func (t Template) Set(ctx context.Context, key, value any, opts ...*option.Set) 
 func (t Template) MSet(ctx context.Context, values ...MSetInput) []MSetOutput {
 	var output []MSetOutput
 	for _, v := range values {
-		err := t.Set(ctx, v.Key, v.Value, v.Opt)
+		result, err := t.set(ctx, 2, v.Key, v.Value, false, v.Opt)
+		if helper.IsNil(err) {
+			err = result.Err()
+		}
 		output = append(output, MSetOutput{
 			Key: v.Key,
-			Err: err,
+			Err: errors.NewSkipCaller(2, err),
 		})
 	}
 	return output
@@ -89,7 +92,7 @@ func (t Template) MSet(ctx context.Context, values ...MSetInput) []MSetOutput {
 //
 // To customize the operation, use the opts parameter (option.Set).
 func (t Template) SetGet(ctx context.Context, key, value, dest any, opts ...*option.Set) error {
-	result, err := t.set(ctx, key, value, true, opts...)
+	result, err := t.set(ctx, 2, key, value, true, opts...)
 	if helper.IsNotNil(err) {
 		return err
 	} else if helper.IsNotNil(result.Err()) {
@@ -243,15 +246,23 @@ func (t Template) SimpleDisconnect() {
 	logger.InfoSkipCaller(2, "Connection to redis closed.")
 }
 
-func (t Template) set(ctx context.Context, key, value any, get bool, opts ...*option.Set) (*redis.StatusCmd, error) {
+func (t Template) set(
+	ctx context.Context,
+	skipCaller int,
+	key,
+	value any,
+	get bool,
+	opts ...*option.Set,
+) (*redis.StatusCmd, error) {
+	skipCaller++
 	opt := option.GetOptionSetByParams(opts)
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
-		return nil, errConvertKey(3)
+		return nil, errConvertKey(skipCaller)
 	}
 	sValue, err := helper.ConvertToString(value)
 	if helper.IsNotNil(err) {
-		return nil, errConvertValue(3)
+		return nil, errConvertValue(skipCaller)
 	}
 	return t.client.SetArgs(ctx, sKey, sValue, redis.SetArgs{
 		Mode:     opt.Mode.String(),

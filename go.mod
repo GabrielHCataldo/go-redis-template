@@ -3,9 +3,9 @@ module github.com/GabrielHCataldo/go-redis-template
 go 1.21.3
 
 require (
-	github.com/GabrielHCataldo/go-errors v1.0.8
-	github.com/GabrielHCataldo/go-helper v1.2.9
-	github.com/GabrielHCataldo/go-logger v1.1.6
+	github.com/GabrielHCataldo/go-errors v1.1.0
+	github.com/GabrielHCataldo/go-helper v1.3.3
+	github.com/GabrielHCataldo/go-logger v1.1.9
 	github.com/redis/go-redis/v9 v9.4.0
 )
 
