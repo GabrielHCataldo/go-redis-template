@@ -9,6 +9,7 @@ import (
 	"github.com/GabrielHCataldo/go-redis-template/redis/option"
 	"github.com/redis/go-redis/v9"
 	"strings"
+	"time"
 )
 
 type MSetInput struct {
@@ -50,9 +51,9 @@ func NewTemplate(opts option.Client) *Template {
 // If the return is nil, the operation was carried out successfully, otherwise an error occurred in the operation.
 //
 // To customize the operation, use the opts parameter (option.Set).
-func (t Template) Set(ctx context.Context, key, value any, opts ...*option.Set) error {
-	result, err := t.set(ctx, 2, key, value, false, opts...)
-	if err == nil {
+func (t *Template) Set(ctx context.Context, key, value any, opts ...*option.Set) error {
+	result, err := t.set(ctx, key, value, false, opts...)
+	if helper.IsNil(err) {
 		err = errors.NewSkipCaller(2, result.Err())
 	}
 	return err
@@ -65,16 +66,16 @@ func (t Template) Set(ctx context.Context, key, value any, opts ...*option.Set) 
 // The return will have a list of MSetOutput with each key and the error // that occurred, if the MSetOutput.Err
 // field is nil, it means that the operation for that key (MSetOutput.Key) was carried out successfully, otherwise
 // it failed .
-func (t Template) MSet(ctx context.Context, values ...MSetInput) []MSetOutput {
+func (t *Template) MSet(ctx context.Context, values ...MSetInput) []MSetOutput {
 	var output []MSetOutput
 	for _, v := range values {
-		result, err := t.set(ctx, 2, v.Key, v.Value, false, v.Opt)
+		result, err := t.set(ctx, v.Key, v.Value, false, v.Opt)
 		if helper.IsNil(err) {
-			err = result.Err()
+			err = errors.NewSkipCaller(2, result.Err())
 		}
 		output = append(output, MSetOutput{
 			Key: v.Key,
-			Err: errors.NewSkipCaller(2, err),
+			Err: err,
 		})
 	}
 	return output
@@ -91,14 +92,15 @@ func (t Template) MSet(ctx context.Context, values ...MSetInput) []MSetOutput {
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 //
 // To customize the operation, use the opts parameter (option.Set).
-func (t Template) SetGet(ctx context.Context, key, value, dest any, opts ...*option.Set) error {
-	result, err := t.set(ctx, 2, key, value, true, opts...)
+func (t *Template) SetGet(ctx context.Context, key, value, dest any, opts ...*option.Set) error {
+	result, err := t.set(ctx, key, value, true, opts...)
 	if helper.IsNotNil(err) {
 		return err
 	} else if helper.IsNotNil(result.Err()) {
 		return errors.NewSkipCaller(2, result.Err())
 	}
-	return errors.NewSkipCaller(2, helper.ConvertToDest(result.Val(), dest))
+	err = helper.ConvertToDest(result.Val(), dest)
+	return errors.NewSkipCaller(2, err)
 }
 
 // Rename redis key.
@@ -107,7 +109,7 @@ func (t Template) SetGet(ctx context.Context, key, value, dest any, opts ...*opt
 // the key or newKey, the error returned is ErrConvertKey or ErrConvertNewKey respectively.
 //
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
-func (t Template) Rename(ctx context.Context, key, newKey any) error {
+func (t *Template) Rename(ctx context.Context, key, newKey any) error {
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
 		return errConvertKey(2)
@@ -116,7 +118,8 @@ func (t Template) Rename(ctx context.Context, key, newKey any) error {
 	if helper.IsNotNil(err) {
 		return errConvertNewKey(2)
 	}
-	return errors.NewSkipCaller(2, t.client.Rename(ctx, sKey, sNewKey).Err())
+	err = t.client.Rename(ctx, sKey, sNewKey).Err()
+	return errors.NewSkipCaller(2, err)
 }
 
 // Get redis `GET key` command.
@@ -127,7 +130,7 @@ func (t Template) Rename(ctx context.Context, key, newKey any) error {
 // The dest parameter must be a pointer, not null, if we do not find any value, dest will not have any modification.
 //
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
-func (t Template) Get(ctx context.Context, key, dest any) error {
+func (t *Template) Get(ctx context.Context, key, dest any) error {
 	if !helper.IsPointer(dest) {
 		return errDestIsNotPointer(2)
 	}
@@ -139,7 +142,8 @@ func (t Template) Get(ctx context.Context, key, dest any) error {
 	if errors.Is(err, redis.Nil) {
 		return nil
 	}
-	return helper.ConvertToDest(result, dest)
+	err = helper.ConvertToDest(result, dest)
+	return errors.NewSkipCaller(2, err)
 }
 
 // GetDel get and delete value by key.
@@ -150,7 +154,7 @@ func (t Template) Get(ctx context.Context, key, dest any) error {
 // The dest parameter must be a pointer, not null, if we do not find any value, dest will not have any modification.
 //
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
-func (t Template) GetDel(ctx context.Context, key, dest any) error {
+func (t *Template) GetDel(ctx context.Context, key, dest any) error {
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
 		return errConvertKey(2)
@@ -173,22 +177,22 @@ func (t Template) GetDel(ctx context.Context, key, dest any) error {
 //
 // The return if true means that the key exists, otherwise it returns false, and if an error occurs in the operation
 // we return false with the second return parameter filled in
-func (t Template) Exists(ctx context.Context, key any) (bool, error) {
+func (t *Template) Exists(ctx context.Context, key any) (bool, error) {
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
 		return false, errConvertKey(2)
 	}
 	result := t.client.Exists(ctx, sKey)
-	return result.Val() > 0, errors.NewSkipCaller(2, result.Err())
+	return helper.IsGreaterThan(result.Val(), 0), errors.NewSkipCaller(2, result.Err())
 }
 
 // Keys return list of keys by pattern.
-func (t Template) Keys(ctx context.Context, pattern string) ([]string, error) {
+func (t *Template) Keys(ctx context.Context, pattern string) ([]string, error) {
 	return t.client.Keys(ctx, pattern).Result()
 }
 
 // Scan return list keys pageable by match
-func (t Template) Scan(ctx context.Context, cursor uint64, match string, count int64) ScanOutput {
+func (t *Template) Scan(ctx context.Context, cursor uint64, match string, count int64) ScanOutput {
 	result := t.client.Scan(ctx, cursor, match, count)
 	keys, c := result.Val()
 	return ScanOutput{
@@ -203,7 +207,7 @@ func (t Template) Scan(ctx context.Context, cursor uint64, match string, count i
 // returned is ErrConvertKeyIndex.
 //
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
-func (t Template) Del(ctx context.Context, keys ...any) error {
+func (t *Template) Del(ctx context.Context, keys ...any) error {
 	var sKeys []string
 	for i, key := range keys {
 		sKey, err := helper.ConvertToString(key)
@@ -216,7 +220,7 @@ func (t Template) Del(ctx context.Context, keys ...any) error {
 }
 
 // SprintKey format values as prefix in string for a future redis key, ex: "test", "test2" -> "test:test2"
-func (t Template) SprintKey(vs ...any) string {
+func (t *Template) SprintKey(vs ...any) string {
 	var builder strings.Builder
 	for _, v := range vs {
 		s, err := helper.ConvertToString(v)
@@ -232,12 +236,12 @@ func (t Template) SprintKey(vs ...any) string {
 }
 
 // Disconnect close connection to redis
-func (t Template) Disconnect() error {
+func (t *Template) Disconnect() error {
 	return errors.NewSkipCaller(2, t.client.Close())
 }
 
 // SimpleDisconnect close connection to redis without error
-func (t Template) SimpleDisconnect() {
+func (t *Template) SimpleDisconnect() {
 	err := t.client.Close()
 	if helper.IsNotNil(err) {
 		logger.ErrorSkipCaller(2, "Error disconnect:", err)
@@ -246,29 +250,27 @@ func (t Template) SimpleDisconnect() {
 	logger.InfoSkipCaller(2, "Connection to redis closed.")
 }
 
-func (t Template) set(
+func (t *Template) set(
 	ctx context.Context,
-	skipCaller int,
 	key,
 	value any,
 	get bool,
 	opts ...*option.Set,
 ) (*redis.StatusCmd, error) {
-	skipCaller++
 	opt := option.GetOptionSetByParams(opts)
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
-		return nil, errConvertKey(skipCaller)
+		return nil, errConvertKey(3)
 	}
 	sValue, err := helper.ConvertToString(value)
 	if helper.IsNotNil(err) {
-		return nil, errConvertValue(skipCaller)
+		return nil, errConvertValue(3)
 	}
 	return t.client.SetArgs(ctx, sKey, sValue, redis.SetArgs{
 		Mode:     opt.Mode.String(),
-		TTL:      opt.TTL,
-		ExpireAt: opt.ExpireAt,
+		TTL:      helper.IfNilReturns(opt.TTL, 0),
+		ExpireAt: helper.IfNilReturns(opt.ExpireAt, time.Time{}),
 		Get:      get,
-		KeepTTL:  opt.KeepTTL,
+		KeepTTL:  helper.IfNilReturns(opt.KeepTTL, false),
 	}), nil
 }

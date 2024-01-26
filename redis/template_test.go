@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"errors"
+	"github.com/GabrielHCataldo/go-helper/helper"
 	"github.com/GabrielHCataldo/go-logger/logger"
 	"testing"
 	"time"
@@ -15,7 +16,7 @@ func TestTemplateSet(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 			defer cancel()
 			err := redisTemplate.Set(ctx, tt.key, tt.value, tt.opt, nil)
-			if (err != nil) != tt.wantErr {
+			if helper.IsNotEqualTo(helper.IsNotNil(err), tt.wantErr) {
 				logger.Errorf("Set() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
 				return
@@ -45,7 +46,7 @@ func TestTemplateSetGet(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 			defer cancel()
 			err := redisTemplate.SetGet(ctx, tt.key, tt.value, tt.dest, tt.opt, nil)
-			if (err != nil) != tt.wantErr {
+			if helper.IsNotEqualTo(helper.IsNotNil(err), tt.wantErr) {
 				logger.Errorf("SetGet() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
 				return
@@ -62,7 +63,7 @@ func TestTemplateRename(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 			defer cancel()
 			err := redisTemplate.Rename(ctx, tt.key, tt.newKey)
-			if (err != nil) != tt.wantErr {
+			if helper.IsNotEqualTo(helper.IsNotNil(err), tt.wantErr) {
 				logger.Errorf("Rename() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
 			}
@@ -78,7 +79,7 @@ func TestTemplateGet(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 			defer cancel()
 			err := redisTemplate.Get(ctx, tt.key, tt.dest)
-			if (err != nil) != tt.wantErr {
+			if helper.IsNotEqualTo(helper.IsNotNil(err), tt.wantErr) {
 				logger.Errorf("Get() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
 				return
@@ -99,7 +100,7 @@ func TestTemplateGetDel(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), d)
 			defer cancel()
 			err := redisTemplate.GetDel(ctx, tt.key, tt.dest)
-			if (err != nil) != tt.wantErr {
+			if helper.IsNotEqualTo(helper.IsNotNil(err), tt.wantErr) {
 				logger.Errorf("GetDel() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
 				return
@@ -116,7 +117,7 @@ func TestTemplateExists(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 			defer cancel()
 			result, err := redisTemplate.Exists(ctx, tt.key)
-			if (err != nil) != tt.wantErr {
+			if helper.IsNotEqualTo(helper.IsNotNil(err), tt.wantErr) {
 				logger.Errorf("Exists() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
 				return
@@ -157,7 +158,7 @@ func TestTemplateDel(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 			defer cancel()
 			err := redisTemplate.Del(ctx, tt.keys...)
-			if (err != nil) != tt.wantErr {
+			if helper.IsNotEqualTo(helper.IsNotNil(err), tt.wantErr) {
 				logger.Errorf("Del() err = %v, wantErr = %v", err, tt.wantErr)
 				t.Fail()
 				return

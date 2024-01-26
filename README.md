@@ -3,7 +3,7 @@
 <!--suppress ALL -->
 <img align="right" src="gopher-redis.png" alt="">
 
-[![Project status](https://img.shields.io/badge/version-v1.1.0-vividgreen.svg)](https://github.com/GabrielHCataldo/go-redis-template/releases/tag/v1.1.0)
+[![Project status](https://img.shields.io/badge/version-v1.1.1-vividgreen.svg)](https://github.com/GabrielHCataldo/go-redis-template/releases/tag/v1.1.1)
 [![Go Report Card](https://goreportcard.com/badge/github.com/GabrielHCataldo/go-redis-template)](https://goreportcard.com/report/github.com/GabrielHCataldo/go-redis-template)
 [![Coverage Status](https://coveralls.io/repos/GabrielHCataldo/go-redis-template/badge.svg?branch=main&service=github)](https://coveralls.io/github/GabrielHCataldo/go-mongo?branch=main)
 [![Open Source Helpers](https://www.codetriage.com/gabrielhcataldo/go-redis-template/badges/users.svg)](https://www.codetriage.com/gabrielhcataldo/go-mongo)

@@ -8,13 +8,13 @@ import (
 // Set represents options that can be used to configure an 'Set' operation.
 type Set struct {
 	// Mode can be SetModeNx, SetModeXx or SetModeDefault.
-	Mode SetMode
+	Mode *SetMode
 	// Zero `TTL` or `Expiration` means that the key has no expiration time.
-	TTL      time.Duration
-	ExpireAt time.Time
+	TTL      *time.Duration
+	ExpireAt *time.Time
 	// KeepTTL is a Redis KEEPTTL option to keep existing TTL, it requires your redis-server version >= 6.0,
 	// otherwise you will receive an error: (error) ERR syntax error.
-	KeepTTL bool
+	KeepTTL *bool
 }
 
 // NewSet creates a new Set instance.
@@ -24,25 +24,25 @@ func NewSet() *Set {
 
 // SetMode sets value for the Mode field.
 func (s *Set) SetMode(mode SetMode) *Set {
-	s.Mode = mode
+	s.Mode = &mode
 	return s
 }
 
 // SetTTL sets value for the TTL field.
 func (s *Set) SetTTL(ttl time.Duration) *Set {
-	s.TTL = ttl
+	s.TTL = &ttl
 	return s
 }
 
 // SetExpireAt sets value for the ExpireAt field.
 func (s *Set) SetExpireAt(expAt time.Time) *Set {
-	s.ExpireAt = expAt
+	s.ExpireAt = &expAt
 	return s
 }
 
 // SetKeepTTL sets value for the KeepTTL field.
 func (s *Set) SetKeepTTL(keepTTL bool) *Set {
-	s.KeepTTL = keepTTL
+	s.KeepTTL = &keepTTL
 	return s
 }
 
@@ -50,21 +50,24 @@ func (s *Set) SetKeepTTL(keepTTL bool) *Set {
 func GetOptionSetByParams(opts []*Set) *Set {
 	result := &Set{}
 	for _, opt := range opts {
-		if opt == nil {
+		if helper.IsNil(opt) {
 			continue
 		}
-		if helper.IsNotEmpty(opt.Mode) {
+		if helper.IsNotNil(opt.Mode) {
 			result.Mode = opt.Mode
 		}
-		if helper.IsNotEmpty(opt.TTL) {
+		if helper.IsNotNil(opt.TTL) {
 			result.TTL = opt.TTL
 		}
-		if helper.IsNotEmpty(opt.ExpireAt) {
+		if helper.IsNotNil(opt.ExpireAt) {
 			result.ExpireAt = opt.ExpireAt
 		}
-		if opt.KeepTTL {
+		if helper.IsNotNil(opt.KeepTTL) {
 			result.KeepTTL = opt.KeepTTL
 		}
+	}
+	if helper.IsNil(result.Mode) {
+		result.Mode = helper.ConvertToPointer(SetModeDefault)
 	}
 	return result
 }
