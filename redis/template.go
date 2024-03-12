@@ -2,8 +2,8 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/GabrielHCataldo/go-errors/errors"
 	"github.com/GabrielHCataldo/go-helper/helper"
 	"github.com/GabrielHCataldo/go-logger/logger"
 	"github.com/GabrielHCataldo/go-redis-template/redis/option"
@@ -54,7 +54,7 @@ func NewTemplate(opts option.Client) *Template {
 func (t *Template) Set(ctx context.Context, key, value any, opts ...*option.Set) error {
 	result, err := t.set(ctx, key, value, false, opts...)
 	if helper.IsNil(err) {
-		err = errors.NewSkipCaller(2, result.Err())
+		err = result.Err()
 	}
 	return err
 }
@@ -71,7 +71,7 @@ func (t *Template) MSet(ctx context.Context, values ...MSetInput) []MSetOutput {
 	for _, v := range values {
 		result, err := t.set(ctx, v.Key, v.Value, false, v.Opt)
 		if helper.IsNil(err) {
-			err = errors.NewSkipCaller(2, result.Err())
+			err = result.Err()
 		}
 		output = append(output, MSetOutput{
 			Key: v.Key,
@@ -97,10 +97,9 @@ func (t *Template) SetGet(ctx context.Context, key, value, dest any, opts ...*op
 	if helper.IsNotNil(err) {
 		return err
 	} else if helper.IsNotNil(result.Err()) {
-		return errors.NewSkipCaller(2, result.Err())
+		return result.Err()
 	}
-	err = helper.ConvertToDest(result.Val(), dest)
-	return errors.NewSkipCaller(2, err)
+	return helper.ConvertToDest(result.Val(), dest)
 }
 
 // Rename redis key.
@@ -112,38 +111,36 @@ func (t *Template) SetGet(ctx context.Context, key, value, dest any, opts ...*op
 func (t *Template) Rename(ctx context.Context, key, newKey any) error {
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
-		return errConvertKey(2)
+		return ErrConvertKey
 	}
 	sNewKey, err := helper.ConvertToString(newKey)
 	if helper.IsNotNil(err) {
-		return errConvertNewKey(2)
+		return ErrConvertNewKey
 	}
-	err = t.client.Rename(ctx, sKey, sNewKey).Err()
-	return errors.NewSkipCaller(2, err)
+	return t.client.Rename(ctx, sKey, sNewKey).Err()
 }
 
 // Get redis `GET key` command.
 //
 // The key parameter can be of any type, but cannot be null, in case an error occurs when converting, the error
-// returned is ErrConvertKey.
+// returned is ErrConvertKey. If no registered key is found, the error ErrKeyNotFound is returned.
 //
-// The dest parameter must be a pointer, not null, if we do not find any value, dest will not have any modification.
+// The dest parameter must be a pointer.
 //
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 func (t *Template) Get(ctx context.Context, key, dest any) error {
 	if !helper.IsPointer(dest) {
-		return errDestIsNotPointer(2)
+		return ErrDestIsNotPointer
 	}
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
-		return errConvertKey(2)
+		return ErrConvertKey
 	}
 	result, err := t.client.Get(ctx, sKey).Result()
 	if errors.Is(err, redis.Nil) {
-		return nil
+		return ErrKeyNotFound
 	}
-	err = helper.ConvertToDest(result, dest)
-	return errors.NewSkipCaller(2, err)
+	return helper.ConvertToDest(result, dest)
 }
 
 // GetDel get and delete value by key.
@@ -151,23 +148,23 @@ func (t *Template) Get(ctx context.Context, key, dest any) error {
 // The key parameter can be of any type, but cannot be null, if an error occurs during the conversion, the error
 // returned is ErrConvertKey. If no registered key is found, the error ErrKeyNotFound is returned.
 //
-// The dest parameter must be a pointer, not null, if we do not find any value, dest will not have any modification.
+// The dest parameter must be a pointer.
 //
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 func (t *Template) GetDel(ctx context.Context, key, dest any) error {
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
-		return errConvertKey(2)
+		return ErrConvertKey
 	}
 	result := t.client.GetDel(ctx, sKey)
 	if helper.IsNotNil(result.Err()) {
-		err = errors.NewSkipCaller(2, result.Err())
+		err = result.Err()
 		if errors.Is(result.Err(), redis.Nil) {
-			err = errKeyNotFound(2)
+			err = ErrKeyNotFound
 		}
 		return err
 	}
-	return errors.NewSkipCaller(2, helper.ConvertToDest(result.Val(), dest))
+	return helper.ConvertToDest(result.Val(), dest)
 }
 
 // Exists redis values by key.
@@ -180,10 +177,10 @@ func (t *Template) GetDel(ctx context.Context, key, dest any) error {
 func (t *Template) Exists(ctx context.Context, key any) (bool, error) {
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
-		return false, errConvertKey(2)
+		return false, ErrConvertKey
 	}
 	result := t.client.Exists(ctx, sKey)
-	return helper.IsGreaterThan(result.Val(), 0), errors.NewSkipCaller(2, result.Err())
+	return helper.IsGreaterThan(result.Val(), 0), result.Err()
 }
 
 // Keys return list of keys by pattern.
@@ -204,19 +201,19 @@ func (t *Template) Scan(ctx context.Context, cursor uint64, match string, count 
 // Del delete redis keys.
 //
 // The keys parameter can be of any type, but cannot be empty, if an error occurs during the conversion, the error
-// returned is ErrConvertKeyIndex.
+// returned is ErrConvertKey.
 //
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 func (t *Template) Del(ctx context.Context, keys ...any) error {
 	var sKeys []string
-	for i, key := range keys {
+	for _, key := range keys {
 		sKey, err := helper.ConvertToString(key)
 		if helper.IsNotNil(err) {
-			return errConvertKeyIndex(2, i)
+			return ErrConvertKey
 		}
 		sKeys = append(sKeys, sKey)
 	}
-	return errors.NewSkipCaller(2, t.client.Del(ctx, sKeys...).Err())
+	return t.client.Del(ctx, sKeys...).Err()
 }
 
 // SprintKey format values as prefix in string for a future redis key, ex: "test", "test2" -> "test:test2"
@@ -237,7 +234,7 @@ func (t *Template) SprintKey(vs ...any) string {
 
 // Disconnect close connection to redis
 func (t *Template) Disconnect() error {
-	return errors.NewSkipCaller(2, t.client.Close())
+	return t.client.Close()
 }
 
 // SimpleDisconnect close connection to redis without error
@@ -260,11 +257,11 @@ func (t *Template) set(
 	opt := option.GetOptionSetByParams(opts)
 	sKey, err := helper.ConvertToString(key)
 	if helper.IsNotNil(err) {
-		return nil, errConvertKey(3)
+		return nil, ErrConvertKey
 	}
 	sValue, err := helper.ConvertToString(value)
 	if helper.IsNotNil(err) {
-		return nil, errConvertValue(3)
+		return nil, ErrConvertValue
 	}
 	return t.client.SetArgs(ctx, sKey, sValue, redis.SetArgs{
 		Mode:     opt.Mode.String(),

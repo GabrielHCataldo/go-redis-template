@@ -164,7 +164,6 @@ func TestTemplateDel(t *testing.T) {
 				return
 			}
 			logger.Info("result:", err)
-			logger.Info("result err convert key equal:", errors.Is(err, ErrConvertKeyIndex))
 		})
 	}
 }
