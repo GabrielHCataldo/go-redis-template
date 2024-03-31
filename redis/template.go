@@ -129,7 +129,7 @@ func (t *Template) Rename(ctx context.Context, key, newKey any) error {
 //
 // If the return is null, the operation was performed successfully, otherwise an error occurred in the operation.
 func (t *Template) Get(ctx context.Context, key, dest any) error {
-	if !helper.IsPointer(dest) {
+	if !helper.IsPointerType(dest) {
 		return ErrDestIsNotPointer
 	}
 	sKey, err := helper.ConvertToString(key)
